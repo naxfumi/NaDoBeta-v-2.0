@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>NaDomped</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f4c5c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='6' width='20' height='14' rx='2'/%3E%3Cpath d='M2 10h20'/%3E%3Cpath d='M6 14h4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css"></link>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 14h4"/></svg>
+      </div>
+      <div class="logo-text">NaDomped</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="navTo('dashboard',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Beranda
+      </button>
+      <button class="nav-item" onclick="navTo('tambah',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Catat Transaksi
+      </button>
+      <button class="nav-item" onclick="navTo('riwayat',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        Riwayat
+      </button>
+      <button class="nav-item" onclick="navTo('statistik',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Statistik
+      </button>
+      <button class="nav-item" onclick="navTo('akun',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Akun
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-section-label">Tampilan</div>
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span class="theme-btn-label" id="themeLabel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Mode Gelap
+        </span>
+        <div class="theme-toggle" id="themeToggle"></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Beranda</div>
+      <div class="topbar-date" id="topbarDate"></div>
+    </div>
+
+    <div class="mobile-header">
+      <div class="mobile-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 14h4"/></svg>
+        </div>
+        NaDomped
+      </div>
+      <button class="mobile-theme-btn" onclick="toggleTheme()" id="mobileThemeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="page-content">
+      <!-- ════ PAGE: DASHBOARD ════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="hero-card">
+          <div class="hero-label">Total Saldo Keseluruhan</div>
+          <div class="hero-amount" id="heroAmount">Rp 0</div>
+          <div class="hero-stats">
+            <div class="hero-stat-item">
+              <div class="hero-stat-label"><div class="hero-stat-dot" style="background:var(--green)"></div> Pemasukan</div>
+              <div class="hero-stat-value" id="heroIn">Rp 0</div>
+            </div>
+            <div class="hero-stat-item">
+              <div class="hero-stat-label"><div class="hero-stat-dot" style="background:var(--red)"></div> Pengeluaran</div>
+              <div class="hero-stat-value" id="heroOut">Rp 0</div>
+            </div>
+            <div class="hero-stat-item">
+              <div class="hero-stat-label"><div class="hero-stat-dot" style="background:var(--amber)"></div> Bulan Ini</div>
+              <div class="hero-stat-value" id="heroBulan">Rp 0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header mb16">
+          <div class="section-title">Saldo per Dompet</div>
+        </div>
+        <div class="wallet-grid" id="walletGrid"></div>
+
+        <div class="dash-bottom">
+          <div class="card chart-wrap">
+            <div class="chart-header">
+              <div class="chart-title">Pengeluaran Harian</div>
+              <div class="period-tabs">
+                <button class="period-tab active" onclick="setPeriod('week',this)">7 Hari</button>
+                <button class="period-tab" onclick="setPeriod('month',this)">30 Hari</button>
+              </div>
+            </div>
+            <canvas id="chartLine" style="max-height:200px"></canvas>
+          </div>
+          <div class="card recent-wrap">
+            <div class="section-header">
+              <div class="section-title">Transaksi Terbaru</div>
+              <button class="section-link" onclick="navTo('riwayat', document.querySelector('[data-page=riwayat]'))">Lihat Semua</button>
+            </div>
+            <div id="recentList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- ════ PAGE: TAMBAH (new flow) ════ -->
+      <div class="page" id="page-tambah">
+        <div class="add-wrap">
+          <div class="card form-card">
+
+            <!-- 1. Type toggle -->
+            <div class="type-switcher">
+              <button class="type-btn active-out" id="btnOut" onclick="setType('out',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                Pengeluaran
+              </button>
+              <button class="type-btn" id="btnIn" onclick="setType('in',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                Pemasukan
+              </button>
+            </div>
+
+            <!-- 2. Category grid FIRST -->
+            <div class="form-section-title">Kategori</div>
+            <div class="cat-picker" id="catPicker"></div>
+
+            <!-- 3. Amount, auto-focus, formatted -->
+            <div class="amount-group">
+              <div class="form-section-title">Jumlah</div>
+              <div class="amount-input-wrap">
+                <span class="amount-prefix">Rp</span>
+                <input class="amount-input" id="inputAmount" type="text" inputmode="numeric" placeholder="0" autocomplete="off">
+              </div>
+            </div>
+
+            <!-- 4. Wallet chip, default to last used -->
+            <div class="wallet-chip-row">
+              <div class="form-section-title">Dompet</div>
+              <button type="button" class="wallet-chip-btn" id="walletChipBtn" onclick="toggleWalletPicker()">
+                <span class="wallet-chip-icon" id="walletChipIcon"></span>
+                <span class="wallet-chip-label">
+                  <span class="wallet-chip-name" id="walletChipName">Dana</span>
+                  <span class="wallet-chip-sub">Tap untuk ganti</span>
+                </span>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="wallet-picker-pop" id="walletPickerPop"></div>
+            </div>
+
+            <!-- 5/6. Collapsible: keterangan (optional) + tanggal -->
+            <button type="button" class="more-options-toggle" id="moreToggle" onclick="toggleMoreOptions()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              Catatan & tanggal (opsional)
+            </button>
+            <div class="more-options-panel" id="moreOptionsPanel">
+              <div class="form-group">
+                <label class="form-label">Keterangan</label>
+                <input class="form-input" id="inputDesc" type="text" placeholder="Contoh: Makan siang...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tanggal</label>
+                <input class="form-input" id="inputDate" type="date">
+              </div>
+            </div>
+
+            <!-- 7. Save -->
+            <button class="submit-btn" onclick="saveTransaction()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Simpan Transaksi
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- ════ PAGE: RIWAYAT ════ -->
+      <div class="page" id="page-riwayat">
+        <div class="history-toolbar">
+          <div class="filter-chips" id="filterChips"></div>
+          <div class="search-input-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" id="searchInput" placeholder="Cari transaksi..." oninput="renderHistory()">
+          </div>
+        </div>
+        <div class="card" style="padding:8px 12px">
+          <div id="historyList"></div>
+        </div>
+      </div>
+
+      <!-- ════ PAGE: STATISTIK ════ -->
+      <div class="page" id="page-statistik">
+        <div class="stats-grid-top" id="statsTop"></div>
+        <div class="stats-bottom">
+          <div class="card chart-wrap">
+            <div class="chart-header"><div class="chart-title">Distribusi Kategori</div></div>
+            <canvas id="chartDonut" style="max-height:220px"></canvas>
+          </div>
+          <div class="card" style="padding:16px">
+            <div class="section-title mb16">Breakdown per Kategori</div>
+            <div class="cat-bar-list" id="catBarList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- ════ PAGE: AKUN ════ -->
+      <div class="page" id="page-akun">
+        <div class="add-wrap">
+
+          <!-- 1. Identity card -->
+          <div class="card settings-card">
+            <div class="account-identity">
+              <div class="account-avatar" id="accountAvatar"></div>
+              <div>
+                <div class="account-name" id="accountName">—</div>
+                <div class="account-email" id="accountEmail">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Theme toggle -->
+          <div class="card settings-card mt16">
+            <div class="settings-card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              Tampilan
+            </div>
+            <button class="theme-btn mt8" onclick="toggleTheme()" style="width:100%">
+              <span class="theme-btn-label" id="themeLabel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                Mode Gelap
+              </span>
+              <div class="theme-toggle" id="themeToggle"></div>
+            </button>
+          </div>
+
+          <!-- 3. Advanced settings trigger -->
+          <button class="data-btn mt16" style="width:100%" onclick="openAdvancedSettings()">
+            <span class="db-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="db-text">
+              <span class="db-label">Pengaturan Lanjutan</span>
+              <span class="db-sub">Dompet, kategori, backup & lainnya</span>
+            </span>
+          </button>
+
+          <!-- 4. Logout -->
+          <button class="modal-btn danger mt16" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" onclick="confirmLogout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Keluar
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ════ MODAL: PENGATURAN LANJUTAN (Advanced Settings) ════ -->
+      <div class="modal-overlay" id="advancedSettingsOverlay">
+        <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto;text-align:left">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <div class="modal-title" style="margin-bottom:0">Pengaturan Lanjutan</div>
+            <button class="tx-btn" onclick="closeAdvancedSettings()" style="width:32px;height:32px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <!-- Kelola Dompet -->
+          <div class="card settings-card">
+            <div class="settings-card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+              Kelola Dompet
+            </div>
+            <div class="settings-card-sub">Tambah atau hapus metode pembayaran</div>
+            <div class="item-list" id="walletList"></div>
+            <div class="form-section-title mt12">Tambah Dompet Baru</div>
+            <div class="add-item-form mt8">
+              <div class="icon-select-wrap">
+                <button type="button" class="icon-select-btn" id="newWalletIconBtn" onclick="toggleIconPicker('wallet')"></button>
+                <div class="icon-picker-pop" id="walletIconPop"></div>
+              </div>
+              <input class="form-input" id="newWalletName" placeholder="Nama dompet...">
+              <input class="form-input" id="newWalletColor" type="color" value="#0A84FF" style="width:46px;padding:6px;cursor:pointer">
+              <button class="add-item-btn" onclick="addWallet()">Tambah</button>
+            </div>
+          </div>
+
+          <!-- Kelola Kategori -->
+          <div class="card settings-card mt16">
+            <div class="settings-card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              Kelola Kategori
+            </div>
+            <div class="settings-card-sub">Kategori pengeluaran & pemasukan</div>
+            <div style="display:flex;gap:8px;margin-bottom:14px;">
+              <button class="filter-chip active" id="catTabOut" onclick="switchCatTab('out')">Pengeluaran</button>
+              <button class="filter-chip" id="catTabIn" onclick="switchCatTab('in')">Pemasukan</button>
+            </div>
+            <div class="item-list" id="catList"></div>
+            <div class="form-section-title mt12">Tambah Kategori</div>
+            <div class="add-item-form mt8">
+              <div class="icon-select-wrap">
+                <button type="button" class="icon-select-btn" id="newCatIconBtn" onclick="toggleIconPicker('cat')"></button>
+                <div class="icon-picker-pop" id="catIconPop"></div>
+              </div>
+              <input class="form-input" id="newCatName" placeholder="Nama kategori...">
+              <button class="add-item-btn" onclick="addCategory()">Tambah</button>
+            </div>
+          </div>
+
+          <!-- Backup & Restore -->
+          <div class="card settings-card mt16">
+            <div class="settings-card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Backup & Restore Data
+            </div>
+            <div class="settings-card-sub">Export data kamu sebagai file backup, atau import dari backup sebelumnya</div>
+            <div class="data-actions">
+              <button class="data-btn" onclick="exportJSON()">
+                <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>
+                <span class="db-text"><span class="db-label">Export JSON</span><span class="db-sub">Backup lengkap semua data</span></span>
+              </button>
+              <button class="data-btn" onclick="exportCSV()">
+                <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span>
+                <span class="db-text"><span class="db-label">Export CSV</span><span class="db-sub">Buka di Excel / Sheets</span></span>
+              </button>
+              <button class="data-btn" onclick="triggerImport()">
+                <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15c.1-.7.2-1.3.2-2 0-5-4-9-9-9-4.1 0-7.6 2.7-8.7 6.4"/><path d="M3 18.5c.7 2.5 3.5 4.5 6.8 4.5 1.9 0 3.6-.6 4.9-1.7"/><polyline points="7 13 3 17 -1 13"/></svg></span>
+                <span class="db-text"><span class="db-label">Import JSON</span><span class="db-sub">Restore dari file backup</span></span>
+              </button>
+            </div>
+            <div class="import-dropzone" id="dropzone" onclick="triggerImport()" ondragover="dzDragOver(event)" ondragleave="dzDragLeave(event)" ondrop="dzDrop(event)">
+              <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div class="dz-text">Drag & drop file backup di sini</div>
+              <div class="dz-sub">atau klik tombol Import JSON di atas · Format: .json</div>
+            </div>
+            <input type="file" id="importInput" accept=".json" style="display:none" onchange="importJSON(event)">
+            <div class="backup-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>File JSON menyimpan seluruh data: transaksi, dompet, & kategori. File CSV hanya berisi riwayat transaksi.</span>
+            </div>
+          </div>
+
+          <!-- Tentang Developer -->
+          <div class="card settings-card mt16" style="border-color:var(--accent)">
+            <div class="settings-card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              Tentang Developer
+            </div>
+            <div class="settings-card-sub">
+              Dibuat dengan 🧠 oleh <strong style="color:var(--text)">Nazril Fahmi</strong> (<a href="https://www.instagram.com/nzrl_af?igsh=OXR3ZXltM3l5OHN3" target="_blank" style="color:var(--accent);text-decoration:none">@nzrl_af</a>)
+            </div>
+            <a href="https://saweria.co/nzrlaf" target="_blank" style="text-decoration:none">
+              <button class="data-btn" style="width:100%">
+                <span class="db-icon" style="background:var(--accent);color:#fff">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                </span>
+                <span class="db-text">
+                  <span class="db-label">Traktir Kopi</span>
+                  <span class="db-sub">Dukung lewat Saweria</span>
+                </span>
+              </button>
+            </a>
+          </div>
+
+          <!-- Zona Berbahaya -->
+          <div class="card settings-card mt16" style="border-color:var(--red)">
+            <div class="settings-card-title" style="color:var(--red)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Zona Berbahaya
+            </div>
+            <div class="settings-card-sub">Tindakan ini tidak bisa dibatalkan</div>
+            <button class="modal-btn danger" style="max-width:220px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="confirmClear()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Hapus Semua Data
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+<!-- FLOATING PILL NAV -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" data-page="dashboard" onclick="navTo('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Beranda</span>
+    </button>
+    <button class="mobile-nav-btn" data-page="riwayat" onclick="navTo('riwayat',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+      <span>Riwayat</span>
+    </button>
+    <button class="mobile-nav-btn fab" data-page="tambah" onclick="navTo('tambah',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Tambah</span>
+    </button>
+    <button class="mobile-nav-btn" data-page="statistik" onclick="navTo('statistik',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Statistik</span>
+    </button>
+    <button class="mobile-nav-btn" data-page="akun" onclick="navTo('akun',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Akun</span>
+    </button>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Konfirmasi</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModal()">Batal</button>
+      <button class="modal-btn danger" id="modalConfirmBtn">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script type="module" src="main.js"></script>
+<!-- Firebase SDK -->
+<script type="module" src="auth.js"></script>
+</body>
+
+</html>
