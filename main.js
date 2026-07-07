@@ -183,6 +183,14 @@ async function fetchAll() {
   }
 }
 
+function getWalletBalance(walletId) {
+  return transactions.reduce((sum, tx) => {
+    if (tx.wallet !== walletId) return sum;
+    if (tx.type === 'in' || tx.type === 'transfer_in') return sum + tx.amount;
+    if (tx.type === 'out' || tx.type === 'transfer_out') return sum - tx.amount;
+    return sum;
+  }, 0);
+}
 // ══════════════════════════════════════════════════
 // FORMAT
 // ══════════════════════════════════════════════════
@@ -393,9 +401,18 @@ async function saveTransaction() {
   if (!currentCat) { toast('Pilih kategori dulu', 'warn'); return; }
   if (!amount || amount <= 0) { toast('Masukkan jumlah dulu', 'warn'); return; }
 
+  if (currentType === 'out') {
+    const saldo = getWalletBalance(currentWallet);
+    if (amount > saldo) {
+      const w = wallets.find(w => w.id === currentWallet);
+      toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${fmtFull(saldo)})`, 'error');
+      return;
+    }
+  }
+
   const txId = String(Date.now());
   const txData = { type: currentType, amount, desc, wallet: currentWallet, cat: currentCat, date };
-
+  
   try {
     await setDoc(doc(userCol('transactions'), txId), txData);
     transactions.unshift({ id: txId, ...txData });
