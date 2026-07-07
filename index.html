@@ -304,7 +304,8 @@
               </div>
               <input class="form-input" id="newWalletName" placeholder="Nama dompet...">
               <input class="form-input" id="newWalletColor" type="color" value="#0A84FF" style="width:46px;padding:6px;cursor:pointer">
-              <button class="add-item-btn" onclick="addWallet()">Tambah</button>
+              <button class="add-item-btn" id="addWalletBtn" onclick="addWallet()">Tambah</button>
+              <button class="add-item-btn" id="cancelWalletEditBtn" onclick="cancelWalletEdit()" style="display:none;background:var(--surface);color:var(--text)">Batal</button>
             </div>
           </div>
 
@@ -327,7 +328,8 @@
                 <div class="icon-picker-pop" id="catIconPop"></div>
               </div>
               <input class="form-input" id="newCatName" placeholder="Nama kategori...">
-              <button class="add-item-btn" onclick="addCategory()">Tambah</button>
+              <button class="add-item-btn" id="addCatBtn" onclick="addCategory()">Tambah</button>
+              <button class="add-item-btn" id="cancelCatEditBtn" onclick="cancelCatEdit()" style="display:none;background:var(--surface);color:var(--text)">Batal</button>
             </div>
           </div>
 
