@@ -134,20 +134,34 @@
           <div class="card form-card">
 
             <!-- 1. Type toggle -->
-            <div class="type-switcher">
+            <div class="type-switcher type-switcher-3">
               <button class="type-btn active-out" id="btnOut" onclick="setType('out',this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                Pengeluaran
+                Keluar
               </button>
               <button class="type-btn" id="btnIn" onclick="setType('in',this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-                Pemasukan
+                Masuk
+              </button>
+              <button class="type-btn" id="btnTransfer" onclick="setType('transfer',this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                Transfer
               </button>
             </div>
 
             <!-- 2. Category grid FIRST -->
-            <div class="form-section-title">Kategori</div>
-            <div class="cat-picker" id="catPicker"></div>
+            <div id="categorySection">
+              <div class="form-section-title">Kategori</div>
+              <div class="cat-picker" id="catPicker"></div>
+            </div>
+
+            <div id="transferSection" style="display:none">
+              <div class="form-section-title">Dari Dompet</div>
+              <div class="wallet-picker-pop open" id="transferFromPicker" style="margin-bottom:16px"></div>
+
+              <div class="form-section-title">Ke Dompet</div>
+              <div class="wallet-picker-pop open" id="transferToPicker"></div>
+            </div>
 
             <!-- 3. Amount, auto-focus, formatted -->
             <div class="amount-group">
