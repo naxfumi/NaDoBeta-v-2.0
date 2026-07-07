@@ -819,6 +819,22 @@ body {
 .item-row-del svg { width: 14px; height: 14px; }
 .item-row-del:hover { background: var(--surface-hover); color: var(--red); }
 
+.item-row-edit {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: none;
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+}
+.item-row-edit:hover { background: var(--surface-hover); color: var(--accent); }
+
 .add-item-form { display: flex; gap: 8px; flex-wrap: wrap; }
 .add-item-form .form-input { flex: 1; min-width: 60px; padding: 10px 12px; font-size: 16px; }
 .add-item-btn {
