@@ -1088,7 +1088,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 9px 12px;
-  border-radius: 50%;
+  border-radius: 18px;
   border: none;
   background: var(--surface);
   cursor: pointer;
