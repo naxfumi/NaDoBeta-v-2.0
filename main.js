@@ -267,18 +267,19 @@ function renderAccountIdentity() {
   const nameEl  = document.getElementById('accountName');
   const emailEl = document.getElementById('accountEmail');
   const avaEl   = document.getElementById('accountAvatar');
+  const mobileAvaEl = document.getElementById('mobileAvatarBtn');
+  const sidebarAvaEl = document.getElementById('sidebarAvatar');
+  const sidebarNameEl = document.getElementById('sidebarAccountName');
+
+  const initial = (user.displayName || user.email || '?').trim().charAt(0).toUpperCase();
+  const avatarHTML = user.photoURL ? `<img src="${user.photoURL}" alt="Avatar">` : initial;
 
   if (nameEl)  nameEl.textContent  = user.displayName || 'Pengguna';
   if (emailEl) emailEl.textContent = user.email || '';
-
-  if (avaEl) {
-    if (user.photoURL) {
-      avaEl.innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
-    } else {
-      const initial = (user.displayName || user.email || '?').trim().charAt(0).toUpperCase();
-      avaEl.innerHTML = initial;
-    }
-  }
+  if (avaEl)   avaEl.innerHTML     = avatarHTML;
+  if (mobileAvaEl)  mobileAvaEl.innerHTML  = avatarHTML;
+  if (sidebarAvaEl) sidebarAvaEl.innerHTML = avatarHTML;
+  if (sidebarNameEl) sidebarNameEl.textContent = user.displayName || 'Pengguna';
 }
 
 function openAdvancedSettings() {
