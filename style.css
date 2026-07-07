@@ -1066,10 +1066,10 @@ body {
 
 /* Mobile header avatar button */
 .mobile-avatar-btn {
-  width: 54px;
+  width: 34px;
   height: 34px;
   border-radius: 50%;
-  
+  border: none;
   background: var(--accent);
   cursor: pointer;
   overflow: hidden;
