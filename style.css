@@ -246,7 +246,7 @@ body {
   Adisplay: none;
   position: fixed;
   left: 14px; right: 14px; bottom: 14px;
-  z-index: 9999;
+  z-index: 150;
   
   /* Tambahkan ini untuk menghindari getaran saat scroll di iOS */
   will-change: transform;
