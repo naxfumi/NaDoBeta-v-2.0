@@ -1124,3 +1124,7 @@ window.dzDrop = dzDrop;
 window.openAdvancedSettings = openAdvancedSettings;
 window.closeAdvancedSettings = closeAdvancedSettings;
 window.renderHistory = renderHistory;
+window.editWallet = editWallet;
+window.cancelWalletEdit = cancelWalletEdit;
+window.editCategory = editCategory;
+window.cancelCatEdit = cancelCatEdit;
