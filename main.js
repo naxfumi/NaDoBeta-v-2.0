@@ -139,6 +139,8 @@ let chartDonut   = null;
 let pendingDeleteFn = null;
 let pickerNewWalletIcon = 'wallet';
 let pickerNewCatIcon = 'box';
+let editingWalletId = null;
+let editingCatId = null;
 
 // ══════════════════════════════════════════════════
 // FIRESTORE HELPERS
@@ -655,6 +657,7 @@ function renderWalletList() {
         <div class="item-row-name">${w.name}</div>
         <div class="item-row-sub" style="display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${w.color};display:inline-block"></span> ${w.color}</div>
       </div>
+      <button class="item-row-edit" onclick="editWallet('${w.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
       <button class="item-row-del" onclick="deleteWallet('${w.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>`).join('');
 }
@@ -664,18 +667,50 @@ async function addWallet() {
   const name  = document.getElementById('newWalletName').value.trim();
   const color = document.getElementById('newWalletColor').value;
   if (!name) { toast('Isi nama dompet dulu','warn'); return; }
-  const id = 'w_' + Date.now();
-  const newWallet = { id, icon, name, color };
+
   try {
-    await setDoc(doc(userCol('wallets'), id), { icon, name, color });
-    wallets.push(newWallet);
+    if (editingWalletId) {
+      // Mode edit — update dokumen yang sudah ada
+      await setDoc(doc(userCol('wallets'), editingWalletId), { icon, name, color });
+      const idx = wallets.findIndex(w => w.id === editingWalletId);
+      if (idx !== -1) wallets[idx] = { id: editingWalletId, icon, name, color };
+      toast('Dompet diperbarui','success');
+      cancelWalletEdit();
+    } else {
+      // Mode tambah baru
+      const id = 'w_' + Date.now();
+      await setDoc(doc(userCol('wallets'), id), { icon, name, color });
+      wallets.push({ id, icon, name, color });
+      toast('Dompet ditambahkan','success');
+    }
     document.getElementById('newWalletName').value = '';
     renderWalletList();
-    toast('Dompet ditambahkan','success');
   } catch (err) {
     console.error(err);
     toast('Gagal menyimpan, cek koneksi', 'error');
   }
+}
+
+function editWallet(id) {
+  const w = wallets.find(w => w.id === id);
+  if (!w) return;
+  editingWalletId = id;
+  pickerNewWalletIcon = w.icon;
+  document.getElementById('newWalletName').value = w.name;
+  document.getElementById('newWalletColor').value = w.color;
+  setIconBtnPreview('wallet', w.icon);
+  document.getElementById('addWalletBtn').textContent = 'Simpan Perubahan';
+  document.getElementById('cancelWalletEditBtn').style.display = 'inline-flex';
+}
+
+function cancelWalletEdit() {
+  editingWalletId = null;
+  document.getElementById('newWalletName').value = '';
+  document.getElementById('newWalletColor').value = '#0A84FF';
+  pickerNewWalletIcon = 'wallet';
+  setIconBtnPreview('wallet', 'wallet');
+  document.getElementById('addWalletBtn').textContent = 'Tambah';
+  document.getElementById('cancelWalletEditBtn').style.display = 'none';
 }
 
 async function deleteWallet(id) {
@@ -706,6 +741,7 @@ function renderCatList() {
     <div class="item-row">
       <span class="item-row-icon" style="background:var(--surface);color:var(--text2)">${svgIcon(c.icon,15)}</span>
       <div class="item-row-name">${c.name}</div>
+      <button class="item-row-edit" onclick="editCategory('${c.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
       <button class="item-row-del" onclick="deleteCat('${c.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>`).join('');
 }
@@ -714,20 +750,54 @@ async function addCategory() {
   const icon = pickerNewCatIcon || 'box';
   const name = document.getElementById('newCatName').value.trim();
   if (!name) { toast('Isi nama kategori dulu','warn'); return; }
-  const id = 'c_' + Date.now();
-  const docId = (catTab === 'out' ? 'out_' : 'in_') + id;
-  const newCat = { id, icon, name };
+
   try {
-    await setDoc(doc(userCol('categories'), docId), { icon, name, type: catTab });
-    if (catTab === 'out') catsOut.push(newCat);
-    else catsIn.push(newCat);
+    if (editingCatId) {
+      // Mode edit
+      const docId = (catTab === 'out' ? 'out_' : 'in_') + editingCatId;
+      await setDoc(doc(userCol('categories'), docId), { icon, name, type: catTab });
+      const cats = catTab === 'out' ? catsOut : catsIn;
+      const idx = cats.findIndex(c => c.id === editingCatId);
+      if (idx !== -1) cats[idx] = { id: editingCatId, icon, name };
+      toast('Kategori diperbarui','success');
+      cancelCatEdit();
+    } else {
+      // Mode tambah baru
+      const id = 'c_' + Date.now();
+      const docId = (catTab === 'out' ? 'out_' : 'in_') + id;
+      await setDoc(doc(userCol('categories'), docId), { icon, name, type: catTab });
+      const newCat = { id, icon, name };
+      if (catTab === 'out') catsOut.push(newCat);
+      else catsIn.push(newCat);
+      toast('Kategori ditambahkan','success');
+    }
     document.getElementById('newCatName').value = '';
     renderCatList();
-    toast('Kategori ditambahkan','success');
   } catch (err) {
     console.error(err);
     toast('Gagal menyimpan, cek koneksi', 'error');
   }
+}
+
+function editCategory(id) {
+  const cats = catTab === 'out' ? catsOut : catsIn;
+  const c = cats.find(c => c.id === id);
+  if (!c) return;
+  editingCatId = id;
+  pickerNewCatIcon = c.icon;
+  document.getElementById('newCatName').value = c.name;
+  setIconBtnPreview('cat', c.icon);
+  document.getElementById('addCatBtn').textContent = 'Simpan Perubahan';
+  document.getElementById('cancelCatEditBtn').style.display = 'inline-flex';
+}
+
+function cancelCatEdit() {
+  editingCatId = null;
+  document.getElementById('newCatName').value = '';
+  pickerNewCatIcon = 'box';
+  setIconBtnPreview('cat', 'box');
+  document.getElementById('addCatBtn').textContent = 'Tambah';
+  document.getElementById('cancelCatEditBtn').style.display = 'none';
 }
 
 async function deleteCat(id) {
