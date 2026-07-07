@@ -1062,7 +1062,7 @@ function txHTML(tx, showDel = false) {
       <div class="tx-info">
         <div class="tx-desc">${displayTitle}</div>
         <div class="tx-meta">${metaText}</div>
-      </div>
+      </div>`
 }
 
 async function deleteTx(id) {
