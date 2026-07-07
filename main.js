@@ -141,42 +141,6 @@ let pickerNewWalletIcon = 'wallet';
 let pickerNewCatIcon = 'box';
 
 // ══════════════════════════════════════════════════
-// EXPOSE KE WINDOW — wajib karena main.js module,
-// sementara HTML pakai onclick="..." yang butuh scope global
-// ══════════════════════════════════════════════════
-window.navTo = navTo;
-window.toggleTheme = toggleTheme;
-window.setType = setType;
-window.selCat = selCat;
-window.toggleWalletPicker = toggleWalletPicker;
-window.selWallet = selWallet;
-window.toggleMoreOptions = toggleMoreOptions;
-window.saveTransaction = saveTransaction;
-window.setPeriod = setPeriod;
-window.setFilterWallet = setFilterWallet;
-window.switchCatTab = switchCatTab;
-window.addWallet = addWallet;
-window.deleteWallet = deleteWallet;
-window.addCategory = addCategory;
-window.deleteCat = deleteCat;
-window.confirmClear = confirmClear;
-window.confirmLogout = confirmLogout;
-window.toggleIconPicker = toggleIconPicker;
-window.selectPickerIcon = selectPickerIcon;
-window.closeModal = closeModal;
-window.deleteTx = deleteTx;
-window.exportJSON = exportJSON;
-window.exportCSV = exportCSV;
-window.triggerImport = triggerImport;
-window.importJSON = importJSON;
-window.dzDragOver = dzDragOver;
-window.dzDragLeave = dzDragLeave;
-window.dzDrop = dzDrop;
-window.openAdvancedSettings = openAdvancedSettings;
-window.closeAdvancedSettings = closeAdvancedSettings;
-window.renderHistory = renderHistory;
-
-// ══════════════════════════════════════════════════
 // FIRESTORE HELPERS
 // ══════════════════════════════════════════════════
 function userCol(name) {
@@ -1041,4 +1005,38 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-
+// ══════════════════════════════════════════════════
+// EXPOSE KE WINDOW — wajib karena main.js module,
+// sementara HTML pakai onclick="..." yang butuh scope global
+// ══════════════════════════════════════════════════
+window.navTo = navTo;
+window.toggleTheme = toggleTheme;
+window.setType = setType;
+window.selCat = selCat;
+window.toggleWalletPicker = toggleWalletPicker;
+window.selWallet = selWallet;
+window.toggleMoreOptions = toggleMoreOptions;
+window.saveTransaction = saveTransaction;
+window.setPeriod = setPeriod;
+window.setFilterWallet = setFilterWallet;
+window.switchCatTab = switchCatTab;
+window.addWallet = addWallet;
+window.deleteWallet = deleteWallet;
+window.addCategory = addCategory;
+window.deleteCat = deleteCat;
+window.confirmClear = confirmClear;
+window.confirmLogout = confirmLogout;
+window.toggleIconPicker = toggleIconPicker;
+window.selectPickerIcon = selectPickerIcon;
+window.closeModal = closeModal;
+window.deleteTx = deleteTx;
+window.exportJSON = exportJSON;
+window.exportCSV = exportCSV;
+window.triggerImport = triggerImport;
+window.importJSON = importJSON;
+window.dzDragOver = dzDragOver;
+window.dzDragLeave = dzDragLeave;
+window.dzDrop = dzDrop;
+window.openAdvancedSettings = openAdvancedSettings;
+window.closeAdvancedSettings = closeAdvancedSettings;
+window.renderHistory = renderHistory;
