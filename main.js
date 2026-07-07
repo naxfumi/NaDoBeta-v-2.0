@@ -141,6 +141,8 @@ let pickerNewWalletIcon = 'wallet';
 let pickerNewCatIcon = 'box';
 let editingWalletId = null;
 let editingCatId = null;
+let transferFromWallet = null;
+let transferToWallet = null;
 
 // ══════════════════════════════════════════════════
 // FIRESTORE HELPERS
@@ -319,8 +321,44 @@ function setType(t, btn) {
   currentType = t;
   document.getElementById('btnOut').className = 'type-btn' + (t === 'out' ? ' active-out' : '');
   document.getElementById('btnIn').className  = 'type-btn' + (t === 'in'  ? ' active-in'  : '');
-  currentCat = '';
-  buildCatPicker();
+  document.getElementById('btnTransfer').className = 'type-btn' + (t === 'transfer' ? ' active-out' : '');
+
+  const isTransfer = t === 'transfer';
+  document.getElementById('categorySection').style.display = isTransfer ? 'none' : 'block';
+  document.getElementById('transferSection').style.display = isTransfer ? 'block' : 'none';
+  document.getElementById('walletChipRow').style.display = isTransfer ? 'none' : 'block';
+
+  if (isTransfer) {
+    transferFromWallet = wallets[0]?.id || null;
+    transferToWallet = wallets[1]?.id || wallets[0]?.id || null;
+    buildTransferPickers();
+  } else {
+    currentCat = '';
+    buildCatPicker();
+  }
+}
+
+function buildTransferPickers() {
+  const fromEl = document.getElementById('transferFromPicker');
+  const toEl = document.getElementById('transferToPicker');
+
+  fromEl.innerHTML = wallets.map(w => `
+    <button type="button" class="wallet-opt ${transferFromWallet === w.id ? 'sel' : ''}" onclick="selTransferWallet('from','${w.id}')">
+      <span class="wo-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 13)}</span>
+      <span class="wo-label">${w.name}</span>
+    </button>`).join('');
+
+  toEl.innerHTML = wallets.map(w => `
+    <button type="button" class="wallet-opt ${transferToWallet === w.id ? 'sel' : ''}" onclick="selTransferWallet('to','${w.id}')">
+      <span class="wo-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 13)}</span>
+      <span class="wo-label">${w.name}</span>
+    </button>`).join('');
+}
+
+function selTransferWallet(which, id) {
+  if (which === 'from') transferFromWallet = id;
+  else transferToWallet = id;
+  buildTransferPickers();
 }
 
 // Category grid — shown first
@@ -1145,3 +1183,4 @@ window.editWallet = editWallet;
 window.cancelWalletEdit = cancelWalletEdit;
 window.editCategory = editCategory;
 window.cancelCatEdit = cancelCatEdit;
+window.selTransferWallet = selTransferWallet;
