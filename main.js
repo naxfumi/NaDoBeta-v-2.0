@@ -432,6 +432,11 @@ document.addEventListener('input', e => {
 });
 
 async function saveTransaction() {
+  if (currentType === 'transfer') {
+    await saveTransfer();
+    return;
+  }
+
   const amount = rawAmountValue();
   const desc   = document.getElementById('inputDesc').value.trim();
   const date   = document.getElementById('inputDate').value || today();
@@ -450,23 +455,89 @@ async function saveTransaction() {
 
   const txId = String(Date.now());
   const txData = { type: currentType, amount, desc, wallet: currentWallet, cat: currentCat, date };
-  
+
   try {
     await setDoc(doc(userCol('transactions'), txId), txData);
     transactions.unshift({ id: txId, ...txData });
 
-    document.getElementById('inputAmount').value = '';
-    document.getElementById('inputDesc').value   = '';
-    document.getElementById('inputDate').value   = today();
-    document.getElementById('moreOptionsPanel').classList.remove('open');
-    document.getElementById('moreToggle').classList.remove('open');
-
-    localStorage.setItem(KEYS.lastWallet, currentWallet);
+    resetTambahForm();
     toast('Transaksi tersimpan', 'success');
     setTimeout(() => navTo('dashboard', document.querySelector('.mobile-nav-btn[data-page=dashboard], .nav-item[onclick*="dashboard"]')), 450);
   } catch (err) {
     console.error(err);
     toast('Gagal menyimpan, cek koneksi', 'error');
+  }
+}
+
+async function saveTransfer() {
+  const amount = rawAmountValue();
+  const desc   = document.getElementById('inputDesc').value.trim();
+  const date   = document.getElementById('inputDate').value || today();
+
+  if (!amount || amount <= 0) { toast('Masukkan jumlah dulu', 'warn'); return; }
+  if (!transferFromWallet || !transferToWallet) { toast('Pilih dompet asal dan tujuan', 'warn'); return; }
+  if (transferFromWallet === transferToWallet) { toast('Dompet asal dan tujuan tidak boleh sama', 'warn'); return; }
+
+  const saldo = getWalletBalance(transferFromWallet);
+  if (amount > saldo) {
+    const w = wallets.find(w => w.id === transferFromWallet);
+    toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${fmtFull(saldo)})`, 'error');
+    return;
+  }
+
+  const transferId = String(Date.now());
+  const txOutId = transferId + '_out';
+  const txInId  = transferId + '_in';
+
+  const wFrom = wallets.find(w => w.id === transferFromWallet);
+  const wTo   = wallets.find(w => w.id === transferToWallet);
+
+  const txOutData = {
+    type: 'transfer_out',
+    amount,
+    desc: desc || `Transfer ke ${wTo?.name || 'dompet lain'}`,
+    wallet: transferFromWallet,
+    cat: '',
+    date,
+    transferId,
+    transferPeer: transferToWallet,
+  };
+  const txInData = {
+    type: 'transfer_in',
+    amount,
+    desc: desc || `Transfer dari ${wFrom?.name || 'dompet lain'}`,
+    wallet: transferToWallet,
+    cat: '',
+    date,
+    transferId,
+    transferPeer: transferFromWallet,
+  };
+
+  try {
+    await Promise.all([
+      setDoc(doc(userCol('transactions'), txOutId), txOutData),
+      setDoc(doc(userCol('transactions'), txInId), txInData),
+    ]);
+    transactions.unshift({ id: txInId, ...txInData });
+    transactions.unshift({ id: txOutId, ...txOutData });
+
+    resetTambahForm();
+    toast('Transfer berhasil', 'success');
+    setTimeout(() => navTo('dashboard', document.querySelector('.mobile-nav-btn[data-page=dashboard], .nav-item[onclick*="dashboard"]')), 450);
+  } catch (err) {
+    console.error(err);
+    toast('Gagal transfer, cek koneksi', 'error');
+  }
+}
+
+function resetTambahForm() {
+  document.getElementById('inputAmount').value = '';
+  document.getElementById('inputDesc').value   = '';
+  document.getElementById('inputDate').value   = today();
+  document.getElementById('moreOptionsPanel').classList.remove('open');
+  document.getElementById('moreToggle').classList.remove('open');
+  if (currentType !== 'transfer') {
+    localStorage.setItem(KEYS.lastWallet, currentWallet);
   }
 }
 
@@ -489,10 +560,18 @@ function renderDashboard() {
   let bulanOut = 0;
 
   transactions.forEach(tx => {
-    const v = tx.type === 'in' ? tx.amount : -tx.amount;
-    if (tx.type === 'in') totalIn += tx.amount; else totalOut += tx.amount;
+    const isIn = tx.type === 'in' || tx.type === 'transfer_in';
+    const isOut = tx.type === 'out' || tx.type === 'transfer_out';
+    const v = isIn ? tx.amount : -tx.amount;
+
+    // Statistik (totalIn/totalOut) HANYA hitung transaksi asli, bukan transfer
+    if (tx.type === 'in') totalIn += tx.amount;
+    if (tx.type === 'out') totalOut += tx.amount;
+
+    // Saldo per dompet TETAP terpengaruh oleh transfer
     if (walletNet[tx.wallet] !== undefined) walletNet[tx.wallet] += v;
-    if (tx.type === 'out' && tx.date?.startsWith(thisMonth)) bulanOut += tx.amount;
+
+    if (tx.type === 'out' && tx.date?.startsWith(thisMonth)) bulanOut += tx.amount;  
   });
 
   const net = totalIn - totalOut;
@@ -953,32 +1032,64 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 // TX HTML
 // ══════════════════════════════════════════════════
 function txHTML(tx, showDel = false) {
+  const isTransfer = tx.type === 'transfer_out' || tx.type === 'transfer_in';
   const allCats = [...catsOut, ...catsIn];
-  const cat = allCats.find(c=>c.id===tx.cat)||{icon:'box',name:'Lainnya'};
-  const w   = wallets.find(w=>w.id===tx.wallet)||{icon:'wallet',name:tx.wallet,color:'#0A84FF'};
-  const sign = tx.type === 'out' ? '−' : '+';
-  const cls  = tx.type === 'out' ? 'out' : 'in';
+  const w = wallets.find(w=>w.id===tx.wallet)||{icon:'wallet',name:tx.wallet,color:'#0A84FF'};
+
+  let iconKey, sign, cls, metaText;
+
+  if (isTransfer) {
+    const peer = wallets.find(w => w.id === tx.transferPeer);
+    iconKey = 'trending'; // ikon panah/transfer
+    sign = tx.type === 'transfer_out' ? '−' : '+';
+    cls  = tx.type === 'transfer_out' ? 'out' : 'in';
+    metaText = tx.type === 'transfer_out'
+      ? `Transfer ke ${peer?.name || '—'}`
+      : `Transfer dari ${peer?.name || '—'}`;
+  } else {
+    const cat = allCats.find(c=>c.id===tx.cat)||{icon:'box',name:'Lainnya'};
+    iconKey = cat.icon;
+    sign = tx.type === 'out' ? '−' : '+';
+    cls  = tx.type === 'out' ? 'out' : 'in';
+    metaText = `<span class="tx-badge" style="color:${w.color};background:${w.color}1A">${w.name}</span>${cat.name !== 'Lainnya' ? ` · ${cat.name}` : ''}`;
+  }
+
   return `
     <div class="tx-item">
-      <div class="tx-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(cat.icon, 17)}</div>
+      <div class="tx-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(iconKey, 17)}</div>
       <div class="tx-info">
-        <div class="tx-desc">${tx.desc || cat.name}</div>
-        <div class="tx-meta">
-          <span class="tx-badge" style="color:${w.color};background:${w.color}1A">${w.name}</span>
-          ${cat.name !== 'Lainnya' ? `· ${cat.name}` : ''}
-        </div>
+        <div class="tx-desc">${tx.desc}</div>
+        <div class="tx-meta">${isTransfer ? metaText : metaText}</div>
       </div>
       <div class="tx-amount ${cls}">${sign} ${fmtFull(tx.amount)}</div>
-      ${showDel ? `<div class="tx-actions"><button class="tx-btn" onclick="deleteTx(${tx.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>` : ''}
+      ${showDel ? `<div class="tx-actions"><button class="tx-btn" onclick="deleteTx('${tx.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>` : ''}
     </div>`;
 }
 
 async function deleteTx(id) {
-  openModal('Hapus Transaksi','Hapus transaksi ini secara permanen?', async () => {
+  const tx = transactions.find(t => t.id === id);
+  const isTransfer = tx && (tx.type === 'transfer_out' || tx.type === 'transfer_in');
+
+  const msg = isTransfer
+    ? 'Ini transaksi transfer — kedua sisi (keluar & masuk) akan ikut terhapus. Lanjutkan?'
+    : 'Hapus transaksi ini secara permanen?';
+
+  openModal('Hapus Transaksi', msg, async () => {
     try {
-      await deleteDoc(doc(userCol('transactions'), String(id)));
-      transactions = transactions.filter(t => t.id !== String(id));
-      renderHistory(); renderDashboard();
+      if (isTransfer && tx.transferId) {
+        const outId = tx.transferId + '_out';
+        const inId  = tx.transferId + '_in';
+        await Promise.all([
+          deleteDoc(doc(userCol('transactions'), outId)),
+          deleteDoc(doc(userCol('transactions'), inId)),
+        ]);
+        transactions = transactions.filter(t => t.transferId !== tx.transferId);
+      } else {
+        await deleteDoc(doc(userCol('transactions'), id));
+        transactions = transactions.filter(t => t.id !== id);
+      }
+      renderHistory();
+      renderDashboard();
       toast('Transaksi dihapus','info');
     } catch (err) {
       console.error(err);
