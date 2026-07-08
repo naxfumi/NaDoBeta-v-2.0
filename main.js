@@ -83,6 +83,7 @@ const KEYS = {
   cats: 'dk_cats_v4',
   theme: 'dk_theme',
   lastWallet: 'dk_last_wallet',
+  hideBalance: 'dk_hide_balance',
 };
 
 const DEFAULT_WALLETS = [
@@ -128,6 +129,7 @@ let wallets      = [];
 let catsOut      = [];
 let catsIn       = [];
 let isDark       = localStorage.getItem(KEYS.theme) !== 'light';
+let isBalanceHidden = localStorage.getItem(KEYS.hideBalance) === 'true';
 let currentType  = 'out';
 let currentWallet = localStorage.getItem(KEYS.lastWallet) || '';
 let currentCat   = '';
@@ -246,6 +248,17 @@ function applyTheme() {
   if (chartDonut) renderStats();
 }
 function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+const EYE_OPEN = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+const EYE_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+function toggleBalanceVisibility() {
+  isBalanceHidden = !isBalanceHidden;
+  localStorage.setItem(KEYS.hideBalance, isBalanceHidden);
+  const icon = document.getElementById('hideBalanceIcon');
+  if (icon) icon.innerHTML = isBalanceHidden ? EYE_CLOSED : EYE_OPEN;
+  renderDashboard();
+}
 
 // ══════════════════════════════════════════════════
 // NAVIGATION
@@ -575,18 +588,22 @@ function renderDashboard() {
   });
 
   const net = totalIn - totalOut;
-  document.getElementById('heroAmount').textContent = fmtFull(net);
-  document.getElementById('heroAmount').className   = 'hero-amount' + (net < 0 ? ' neg' : '');
+  document.getElementById('heroAmount').textContent = isBalanceHidden ? '••••••••' : fmtFull(net);
+  document.getElementById('heroAmount').className   = 'hero-amount' + (net < 0 && !isBalanceHidden ? ' neg' : '');
   document.getElementById('heroIn').textContent     = fmt(totalIn);
   document.getElementById('heroOut').textContent    = fmt(totalOut);
   document.getElementById('heroBulan').textContent  = fmt(bulanOut);
 
-  document.getElementById('walletGrid').innerHTML = wallets.map(w => `
-    <div class="wallet-card" onclick="navTo('riwayat',null);setFilterWallet('${w.id}')">
+  document.getElementById('walletGrid').innerHTML = wallets.map(w => {
+    const bal = walletNet[w.id] || 0;
+    const balDisplay = isBalanceHidden ? '••••••' : `${bal < 0 ? '−' : ''}${fmtFull(bal)}`;
+    return `
+      <div class="wallet-card" onclick="navTo('riwayat',null);setFilterWallet('${w.id}')">
       <div class="wallet-card-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 14)}</div>
       <div class="wallet-card-name">${w.name}</div>
-      <div class="wallet-card-balance">${fmtFull(walletNet[w.id] || 0)}</div>
-    </div>`).join('');
+      <div class="wallet-card-balance" style="color:${(bal < 0 && !isBalanceHidden) ? 'var(--red)' : 'var(--text)'}">${balDisplay}</div>
+    </div>`;
+  }).join('');
 
   renderLineChart();
 
@@ -1231,8 +1248,8 @@ function dzDrop(e) {
 // ══════════════════════════════════════════════════
 applyTheme();
 
-document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-document.getElementById('inputDate').value = today();
+const initialEyeIcon = document.getElementById('hideBalanceIcon');
+if (initialEyeIcon) initialEyeIcon.innerHTML = isBalanceHidden ? EYE_CLOSED : EYE_OPEN;
 
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
@@ -1304,3 +1321,4 @@ window.cancelWalletEdit = cancelWalletEdit;
 window.editCategory = editCategory;
 window.cancelCatEdit = cancelCatEdit;
 window.selTransferWallet = selTransferWallet;
+window.toggleBalanceVisibility = toggleBalanceVisibility;
