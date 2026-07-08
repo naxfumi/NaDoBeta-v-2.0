@@ -85,7 +85,12 @@
       <!-- ════ PAGE: DASHBOARD ════ -->
       <div class="page active" id="page-dashboard">
         <div class="hero-card">
-          <div class="hero-label">Total Saldo Keseluruhan</div>
+          <div class="hero-label" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Total Saldo Keseluruhan</span>
+            <button onclick="toggleBalanceVisibility()" id="hideBalanceBtn" style="background:none;border:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;padding:4px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="hideBalanceIcon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
           <div class="hero-amount" id="heroAmount">Rp 0</div>
           <div class="hero-stats">
             <div class="hero-stat-item">
