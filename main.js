@@ -1055,7 +1055,7 @@ function txHTML(tx, showDel = false) {
   }
 
   const displayTitle = tx.desc && tx.desc.trim() ? tx.desc : (isTransfer ? tx.desc : (allCats.find(c=>c.id===tx.cat)?.name || 'Transaksi'));
-
+console.log('desc:', tx.desc, '| displayTitle:', displayTitle);
   return `
     <div class="tx-item">
       <div class="tx-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(iconKey, 17)}</div>
