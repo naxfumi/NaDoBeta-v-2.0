@@ -661,8 +661,15 @@ function renderHistory() {
   if (filterWallet === 'out') filtered = filtered.filter(tx => tx.type === 'out');
   else if (filterWallet === 'in') filtered = filtered.filter(tx => tx.type === 'in');
   else if (filterWallet !== 'all') filtered = filtered.filter(tx => tx.wallet === filterWallet);
-  if (q) filtered = filtered.filter(tx => tx.desc.toLowerCase().includes(q) || (wallets.find(w=>w.id===tx.wallet)?.name||'').toLowerCase().includes(q));
-
+  if (q) {
+    const allCatsForSearch = [...catsOut, ...catsIn];
+    filtered = filtered.filter(tx => {
+      const catName = (allCatsForSearch.find(c => c.id === tx.cat)?.name || '').toLowerCase();
+      const walletName = (wallets.find(w => w.id === tx.wallet)?.name || '').toLowerCase();
+      const descText = (tx.desc || '').toLowerCase();
+      return descText.includes(q) || catName.includes(q) || walletName.includes(q);
+    });
+  }
   document.getElementById('historyList').innerHTML = filtered.length
     ? renderGroupedTx(filtered, true)
     : emptyHTML('inbox','Tidak ada transaksi','Coba ubah filter atau kata kunci pencarian');
