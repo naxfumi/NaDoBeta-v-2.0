@@ -1054,13 +1054,15 @@ function txHTML(tx, showDel = false) {
     metaText = `<span class="tx-badge" style="color:${w.color};background:${w.color}1A">${w.name}</span>${cat.name !== 'Lainnya' ? ` · ${cat.name}` : ''}`;
   }
 
+  const displayTitle = tx.desc && tx.desc.trim() ? tx.desc : (isTransfer ? tx.desc : (allCats.find(c=>c.id===tx.cat)?.name || 'Transaksi'));
+
   return `
     <div class="tx-item">
       <div class="tx-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(iconKey, 17)}</div>
       <div class="tx-info">
-        <div class="tx-desc">${tx.desc}</div>
-        <div class="tx-meta">${isTransfer ? metaText : metaText}</div>
-      </div> `
+        <div class="tx-desc">${displayTitle}</div>
+        <div class="tx-meta">${metaText}</div>
+      </div>`;
 }
 
 async function deleteTx(id) {
