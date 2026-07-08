@@ -590,9 +590,9 @@ function renderDashboard() {
   const net = totalIn - totalOut;
   document.getElementById('heroAmount').textContent = isBalanceHidden ? '••••••••' : fmtFull(net);
   document.getElementById('heroAmount').className   = 'hero-amount' + (net < 0 && !isBalanceHidden ? ' neg' : '');
-  document.getElementById('heroIn').textContent     = fmt(totalIn);
-  document.getElementById('heroOut').textContent    = fmt(totalOut);
-  document.getElementById('heroBulan').textContent  = fmt(bulanOut);
+  document.getElementById('heroIn').textContent     = isBalanceHidden ? '••••••' : fmt(totalIn);
+  document.getElementById('heroOut').textContent    = isBalanceHidden ? '••••••' : fmt(totalOut);
+  document.getElementById('heroBulan').textContent  = isBalanceHidden ? '••••••' : fmt(bulanOut);
 
   document.getElementById('walletGrid').innerHTML = wallets.map(w => {
     const bal = walletNet[w.id] || 0;
