@@ -580,8 +580,10 @@ function resetTambahForm() {
 // Close wallet picker pop if clicking outside
 document.addEventListener('click', e => {
   if (!e.target.closest('.wallet-chip-row')) {
-    const pop = document.getElementById('walletPickerPop');
-    if (pop) pop.classList.remove('open');
+    ['walletPickerPop', 'transferFromPicker', 'transferToPicker'].forEach(id => {
+      const pop = document.getElementById(id);
+      if (pop) pop.classList.remove('open');
+    });
   }
 });
 // ══════════════════════════════════════════════════
@@ -1345,3 +1347,4 @@ window.editCategory = editCategory;
 window.cancelCatEdit = cancelCatEdit;
 window.selTransferWallet = selTransferWallet;
 window.toggleBalanceVisibility = toggleBalanceVisibility;
+window.toggleTransferPicker = toggleTransferPicker;
