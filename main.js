@@ -352,26 +352,49 @@ function setType(t, btn) {
 }
 
 function buildTransferPickers() {
-  const fromEl = document.getElementById('transferFromPicker');
-  const toEl = document.getElementById('transferToPicker');
+  updateTransferChip('from');
+  updateTransferChip('to');
+  buildTransferPickerPop('from');
+  buildTransferPickerPop('to');
+}
 
-  fromEl.innerHTML = wallets.map(w => `
-    <button type="button" class="wallet-opt ${transferFromWallet === w.id ? 'sel' : ''}" onclick="selTransferWallet('from','${w.id}')">
+function updateTransferChip(which) {
+  const walletId = which === 'from' ? transferFromWallet : transferToWallet;
+  const w = wallets.find(w => w.id === walletId);
+  if (!w) return;
+
+  const iconEl = document.getElementById(which === 'from' ? 'transferFromChipIcon' : 'transferToChipIcon');
+  const nameEl = document.getElementById(which === 'from' ? 'transferFromChipName' : 'transferToChipName');
+
+  iconEl.style.background = w.color + '1F';
+  iconEl.style.color = w.color;
+  iconEl.innerHTML = svgIcon(w.icon, 14);
+  nameEl.textContent = w.name;
+}
+
+function buildTransferPickerPop(which) {
+  const pop = document.getElementById(which === 'from' ? 'transferFromPicker' : 'transferToPicker');
+  const selectedId = which === 'from' ? transferFromWallet : transferToWallet;
+
+  pop.innerHTML = wallets.map(w => `
+    <button type="button" class="wallet-opt ${selectedId === w.id ? 'sel' : ''}" onclick="selTransferWallet('${which}','${w.id}')">
       <span class="wo-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 13)}</span>
       <span class="wo-label">${w.name}</span>
     </button>`).join('');
+}
 
-  toEl.innerHTML = wallets.map(w => `
-    <button type="button" class="wallet-opt ${transferToWallet === w.id ? 'sel' : ''}" onclick="selTransferWallet('to','${w.id}')">
-      <span class="wo-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 13)}</span>
-      <span class="wo-label">${w.name}</span>
-    </button>`).join('');
+function toggleTransferPicker(which) {
+  const popId = which === 'from' ? 'transferFromPicker' : 'transferToPicker';
+  const otherPopId = which === 'from' ? 'transferToPicker' : 'transferFromPicker';
+  document.getElementById(otherPopId).classList.remove('open');
+  document.getElementById(popId).classList.toggle('open');
 }
 
 function selTransferWallet(which, id) {
   if (which === 'from') transferFromWallet = id;
   else transferToWallet = id;
   buildTransferPickers();
+  document.getElementById(which === 'from' ? 'transferFromPicker' : 'transferToPicker').classList.remove('open');
 }
 
 // Category grid — shown first
