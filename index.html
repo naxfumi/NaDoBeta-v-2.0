@@ -161,11 +161,31 @@
             </div>
 
             <div id="transferSection" style="display:none">
-              <div class="form-section-title">Dari Dompet</div>
-              <div class="wallet-picker-pop open" id="transferFromPicker" style="margin-bottom:16px"></div>
+              <div class="wallet-chip-row">
+                <div class="form-section-title">Dari Dompet</div>
+                <button type="button" class="wallet-chip-btn" id="transferFromChipBtn" onclick="toggleTransferPicker('from')">
+                  <span class="wallet-chip-icon" id="transferFromChipIcon"></span>
+                  <span class="wallet-chip-label">
+                    <span class="wallet-chip-name" id="transferFromChipName">—</span>
+                    <span class="wallet-chip-sub">Tap untuk ganti</span>
+                  </span>
+                  <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="wallet-picker-pop" id="transferFromPicker"></div>
+              </div>
 
-              <div class="form-section-title">Ke Dompet</div>
-              <div class="wallet-picker-pop open" id="transferToPicker"></div>
+              <div class="wallet-chip-row">
+                <div class="form-section-title">Ke Dompet</div>
+                <button type="button" class="wallet-chip-btn" id="transferToChipBtn" onclick="toggleTransferPicker('to')">
+                  <span class="wallet-chip-icon" id="transferToChipIcon"></span>
+                  <span class="wallet-chip-label">
+                    <span class="wallet-chip-name" id="transferToChipName">—</span>
+                    <span class="wallet-chip-sub">Tap untuk ganti</span>
+                  </span>
+                  <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="wallet-picker-pop" id="transferToPicker"></div>
+              </div>
             </div>
 
             <!-- 3. Amount, auto-focus, formatted -->
