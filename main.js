@@ -423,6 +423,7 @@ function buildWalletChip() {
   document.getElementById('walletChipIcon').style.color = w.color;
   document.getElementById('walletChipIcon').innerHTML = svgIcon(w.icon, 14);
   document.getElementById('walletChipName').textContent = w.name;
+  document.getElementById('walletChipSub').textContent = fmtFull(getWalletBalance(w.id));
 }
 
 function buildWalletPickerPop() {
