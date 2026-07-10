@@ -365,11 +365,13 @@ function updateTransferChip(which) {
 
   const iconEl = document.getElementById(which === 'from' ? 'transferFromChipIcon' : 'transferToChipIcon');
   const nameEl = document.getElementById(which === 'from' ? 'transferFromChipName' : 'transferToChipName');
+  const subEl  = document.getElementById(which === 'from' ? 'transferFromChipSub' : 'transferToChipSub');
 
   iconEl.style.background = w.color + '1F';
   iconEl.style.color = w.color;
   iconEl.innerHTML = svgIcon(w.icon, 14);
   nameEl.textContent = w.name;
+  subEl.textContent = fmtFull(getWalletBalance(w.id));
 }
 
 function buildTransferPickerPop(which) {
