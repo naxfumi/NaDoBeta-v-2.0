@@ -1536,7 +1536,7 @@ document.getElementById('advancedSettingsOverlay').addEventListener('click', e =
 });
 
 // ── AUTH GUARD + LOAD DATA DARI FIRESTORE ──────────
-const DEV_MODE = true;
+const DEV_MODE = false;
 
 async function loadDashboard() {
   showDashboardSkeleton();
