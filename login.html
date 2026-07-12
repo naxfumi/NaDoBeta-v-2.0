@@ -6,12 +6,13 @@
 <title>NaDomped — Masuk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
 /* ═══════════════════════════════════════════
    TOKENS — sama persis dengan app utama
 ═══════════════════════════════════════════ */
 :root {
-  --accent: #0A84FF;
+  --accent: #34D399;
   --green:  #30D158;
   --bg:     #000000;
   --bg2:    #1C1C1E;
@@ -70,9 +71,9 @@ html, body {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--border) 2px, transparent 1px);
   background-size: 28px 28px;
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 0;
 }
@@ -283,6 +284,7 @@ html, body {
       </svg>
       Lanjut dengan Google
     </button>
+    
 
     <!-- Fine print -->
     <p class="fine-print">
@@ -306,6 +308,8 @@ import {
   signInWithPopup,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+
 
 // ── FIREBASE CONFIG ──────────────────────────────
 // Ganti seluruh objek ini dengan config dari Firebase Console kamu

@@ -8,6 +8,8 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+
+
 // Ganti dengan config Firebase kamu
 const firebaseConfig = {
   apiKey: "AIzaSyDEqRjayX6uok6UIDka1Py7lMhURpvGaMw",

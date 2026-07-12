@@ -13,6 +13,9 @@ import {
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyDEqRjayX6uok6UIDka1Py7lMhURpvGaMw",
   authDomain: "nadomped.firebaseapp.com",
@@ -73,6 +76,7 @@ function svgIcon(key, size = 16) {
   const path = ICONS[key] || ICONS.more;
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 }
+
 
 // ══════════════════════════════════════════════════
 // STORAGE
@@ -145,6 +149,8 @@ let editingWalletId = null;
 let editingCatId = null;
 let transferFromWallet = null;
 let transferToWallet = null;
+let calendarViewDate = new Date();
+let calendarSelectedDate = today();
 
 // ══════════════════════════════════════════════════
 // FIRESTORE HELPERS
@@ -154,6 +160,60 @@ function userCol(name) {
 }
 
 async function fetchAll() {
+
+  if (DEV_MODE) {
+    wallets = DEFAULT_WALLETS;
+    catsOut = DEFAULT_CATS_OUT;
+    catsIn = DEFAULT_CATS_IN;
+
+    transactions = [
+      {
+        id: "1",
+        type: "out",
+        amount: 5000,
+        cat: "kecantikan",
+        wallet: "bni",
+        note: "Makan siang",
+        date: "2026-07-11"
+      },
+      {
+        id: "2",
+        type: "out",
+        amount: 5000000,
+        cat: "pulsa",
+        wallet: "bca",
+        note: "Gaji",
+        date: "2020-07-10"
+      },
+      {
+        id: "3",
+        type: "out",
+        amount: 2000000,
+        cat: "bisnis",
+        wallet: "dana",
+        note: "Gaji",
+        date: "2026-07-10"
+      },
+      {
+        id: "4",
+        type: "out",
+        amount: 5000000,
+        cat: "bisnis",
+        wallet: "ovo",
+        note: "Gaji",
+        date: "2026-07-10"
+      }
+    ];
+
+    if (!currentWallet) {
+      currentWallet = wallets[0].id;
+    }
+
+    return;
+  }
+
+  // ===== KODE LAMAMU =====
+  
   const [txSnap, walSnap, catSnap] = await Promise.all([
     getDocs(userCol('transactions')),
     getDocs(userCol('wallets')),
@@ -195,6 +255,17 @@ function getWalletBalance(walletId) {
     return sum;
   }, 0);
 }
+
+function getWalletBalanceAfterDelete(walletId, txIdToDelete, transferIdToDelete = null) {
+  return transactions.reduce((sum, tx) => {
+    if (tx.wallet !== walletId) return sum;
+    if (tx.id === txIdToDelete) return sum; // skip transaksi yang mau dihapus
+    if (transferIdToDelete && tx.transferId === transferIdToDelete) return sum; // skip sepasang transfer
+    if (tx.type === 'in' || tx.type === 'transfer_in') return sum + tx.amount;
+    if (tx.type === 'out' || tx.type === 'transfer_out') return sum - tx.amount;
+    return sum;
+  }, 0);
+}
 // ══════════════════════════════════════════════════
 // FORMAT
 // ══════════════════════════════════════════════════
@@ -207,6 +278,32 @@ function fmt(n) {
 function fmtFull(n) { return 'Rp ' + Math.abs(n).toLocaleString('id-ID'); }
 function fmtDate(d) { return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
 function today() { return new Date().toISOString().slice(0,10); }
+
+function animateNumber(el, targetValue, duration = 600, formatFn = fmtFull) {
+  if (!el) return;
+  const startValue = 0;
+  const startTime = performance.now();
+
+  function easeOutQuart(t) {
+    return 1 - Math.pow(1 - t, 4);
+  }
+
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutQuart(progress);
+    const currentValue = Math.round(startValue + (targetValue - startValue) * eased);
+    el.textContent = formatFn(currentValue);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = formatFn(targetValue);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
 
 // Group label like "Hari Ini", "Kemarin", or formatted date
 function dateGroupLabel(dateStr) {
@@ -321,20 +418,123 @@ function initTambahForm() {
   buildCatPicker();
   buildWalletChip();
   buildWalletPickerPop();
-  document.getElementById('inputDate').value = today();
+  selectToday();
   document.getElementById('inputDesc').value = '';
   document.getElementById('inputAmount').value = '';
-  // Auto-focus amount only on larger screens (avoids unwanted keyboard pop on mobile nav transition)
   if (window.innerWidth > 768) {
     setTimeout(() => document.getElementById('inputAmount').focus(), 50);
   }
 }
 
+//custom date 
+const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+function toggleDatePicker() {
+  const pop = document.getElementById('datePickerPop');
+  const isOpening = !pop.classList.contains('open');
+
+  if (isOpening) {
+    // Buka kalender di bulan sesuai tanggal yang sedang dipilih
+    const [y, m] = calendarSelectedDate.split('-').map(Number);
+    calendarViewDate = new Date(y, m - 1, 1);
+    renderCalendar();
+    positionDatePicker();
+  }
+  pop.classList.toggle('open');
+}
+
+function positionDatePicker() {
+  const pop = document.getElementById('datePickerPop');
+  const btn = document.getElementById('dateDisplayBtn');
+  pop.classList.remove('flip-up');
+
+  const btnRect = btn.getBoundingClientRect();
+  const popHeight = 380; // perkiraan tinggi dropdown
+  const spaceBelow = window.innerHeight - btnRect.bottom;
+
+  if (spaceBelow < popHeight) {
+    pop.classList.add('flip-up');
+  }
+}
+
+function shiftCalendarMonth(delta) {
+  calendarViewDate.setMonth(calendarViewDate.getMonth() + delta);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+
+  document.getElementById('calendarTitle').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay(); // 0 = Minggu
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayStr = today();
+
+  const cells = [];
+
+  // Hari-hari dari bulan sebelumnya (abu-abu, non-aktif)
+  for (let i = startOffset - 1; i >= 0; i--) {
+    cells.push({ day: daysInPrevMonth - i, otherMonth: true, dateStr: null });
+  }
+
+  // Hari-hari bulan ini
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells.push({ day: d, otherMonth: false, dateStr });
+  }
+
+  // Genapkan grid ke kelipatan 7 dengan hari bulan berikutnya
+  const remainder = cells.length % 7;
+  if (remainder !== 0) {
+    for (let d = 1; d <= 7 - remainder; d++) {
+      cells.push({ day: d, otherMonth: true, dateStr: null });
+    }
+  }
+
+  document.getElementById('calendarGrid').innerHTML = cells.map(c => {
+    if (c.otherMonth) {
+      return `<button type="button" class="date-picker-day other-month" disabled>${c.day}</button>`;
+    }
+    const isToday = c.dateStr === todayStr;
+    const isSelected = c.dateStr === calendarSelectedDate;
+    const cls = ['date-picker-day', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+    return `<button type="button" class="${cls}" onclick="selectCalendarDate('${c.dateStr}')">${c.day}</button>`;
+  }).join('');
+}
+
+function selectCalendarDate(dateStr) {
+  calendarSelectedDate = dateStr;
+  document.getElementById('inputDate').value = dateStr;
+  document.getElementById('dateDisplayText').textContent = formatDateDisplay(dateStr);
+  document.getElementById('datePickerPop').classList.remove('open');
+}
+
+function selectToday() {
+  const t = today();
+  calendarSelectedDate = t;
+  document.getElementById('inputDate').value = t;
+  document.getElementById('dateDisplayText').textContent = 'Hari Ini';
+  document.getElementById('datePickerPop').classList.remove('open');
+}
+
+function formatDateDisplay(dateStr) {
+  if (dateStr === today()) return 'Hari Ini';
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (dateStr === y.toISOString().slice(0,10)) return 'Kemarin';
+  return fmtDate(dateStr);
+}
+
+//========
+
 function setType(t, btn) {
   currentType = t;
   document.getElementById('btnOut').className = 'type-btn' + (t === 'out' ? ' active-out' : '');
   document.getElementById('btnIn').className  = 'type-btn' + (t === 'in'  ? ' active-in'  : '');
-  document.getElementById('btnTransfer').className = 'type-btn' + (t === 'transfer' ? ' active-out' : '');
+  document.getElementById('btnTransfer').className = 'type-btn' + (t === 'transfer' ? ' active-tf' : '');
 
   const isTransfer = t === 'transfer';
   document.getElementById('categorySection').style.display = isTransfer ? 'none' : 'block';
@@ -362,16 +562,17 @@ function updateTransferChip(which) {
   const walletId = which === 'from' ? transferFromWallet : transferToWallet;
   const w = wallets.find(w => w.id === walletId);
   if (!w) return;
-
+  
   const iconEl = document.getElementById(which === 'from' ? 'transferFromChipIcon' : 'transferToChipIcon');
   const nameEl = document.getElementById(which === 'from' ? 'transferFromChipName' : 'transferToChipName');
-  const subEl  = document.getElementById(which === 'from' ? 'transferFromChipSub' : 'transferToChipSub');
-
+  const subEl = document.getElementById(which === 'from' ? 'transferFromChipSub' : 'transferToChipSub');
+  
   iconEl.style.background = w.color + '1F';
   iconEl.style.color = w.color;
   iconEl.innerHTML = svgIcon(w.icon, 14);
   nameEl.textContent = w.name;
-  subEl.textContent = fmtFull(getWalletBalance(w.id));
+  const bal = getWalletBalance(w.id);
+  subEl.textContent = (bal < 0 ? '−' : '') + fmtFull(bal);
 }
 
 function buildTransferPickerPop(which) {
@@ -425,7 +626,8 @@ function buildWalletChip() {
   document.getElementById('walletChipIcon').style.color = w.color;
   document.getElementById('walletChipIcon').innerHTML = svgIcon(w.icon, 14);
   document.getElementById('walletChipName').textContent = w.name;
-  document.getElementById('walletChipSub').textContent = fmtFull(getWalletBalance(w.id));
+  const bal = getWalletBalance(w.id);
+  document.getElementById('walletChipSub').textContent = (bal < 0 ? '−' : '') + fmtFull(bal);
 }
 
 function buildWalletPickerPop() {
@@ -487,7 +689,8 @@ async function saveTransaction() {
     const saldo = getWalletBalance(currentWallet);
     if (amount > saldo) {
       const w = wallets.find(w => w.id === currentWallet);
-      toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${fmtFull(saldo)})`, 'error');
+      const saldoDisplay = (saldo < 0 ? '−' : '') + fmtFull(saldo);
+      toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${saldoDisplay})`, 'error');
       return;
     }
   }
@@ -520,7 +723,8 @@ async function saveTransfer() {
   const saldo = getWalletBalance(transferFromWallet);
   if (amount > saldo) {
     const w = wallets.find(w => w.id === transferFromWallet);
-    toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${fmtFull(saldo)})`, 'error');
+    const saldoDisplay = (saldo < 0 ? '−' : '') + fmtFull(saldo);
+    toast(`Saldo ${w?.name || 'dompet'} tidak cukup (${saldoDisplay})`, 'error');
     return;
   }
 
@@ -588,10 +792,31 @@ document.addEventListener('click', e => {
       if (pop) pop.classList.remove('open');
     });
   }
+  if (!e.target.closest('.date-picker-wrap')) {
+    document.getElementById('datePickerPop')?.classList.remove('open');
+  }
 });
 // ══════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════
+function showDashboardSkeleton() {
+  document.getElementById('heroCardSkeleton').style.display = 'block';
+  document.getElementById('heroCardContent').style.display = 'none';
+  document.getElementById('walletGridSkeleton').style.display = 'grid';
+  document.getElementById('walletGrid').style.display = 'none';
+  document.getElementById('recentListSkeleton').style.display = 'block';
+  document.getElementById('recentList').style.display = 'none';
+}
+
+function hideDashboardSkeleton() {
+  document.getElementById('heroCardSkeleton').style.display = 'none';
+  document.getElementById('heroCardContent').style.display = 'block';
+  document.getElementById('walletGridSkeleton').style.display = 'none';
+  document.getElementById('walletGrid').style.display = 'grid';
+  document.getElementById('recentListSkeleton').style.display = 'none';
+  document.getElementById('recentList').style.display = 'block';
+}
+
 function renderDashboard() {
   let totalIn = 0, totalOut = 0;
   const walletNet = {};
@@ -616,17 +841,25 @@ function renderDashboard() {
   });
 
   const net = totalIn - totalOut;
-  document.getElementById('heroAmount').textContent = isBalanceHidden ? '••••••••' : fmtFull(net);
-  document.getElementById('heroAmount').className   = 'hero-amount' + (net < 0 && !isBalanceHidden ? ' neg' : '');
-  document.getElementById('heroIn').textContent     = isBalanceHidden ? '••••••' : fmt(totalIn);
-  document.getElementById('heroOut').textContent    = isBalanceHidden ? '••••••' : fmt(totalOut);
-  document.getElementById('heroBulan').textContent  = isBalanceHidden ? '••••••' : fmt(bulanOut);
+  document.getElementById('heroAmount').className = 'hero-amount' + (net < 0 && !isBalanceHidden ? ' neg' : '');
+  
+  if (isBalanceHidden) {
+    document.getElementById('heroAmount').textContent = '••••••••';
+    document.getElementById('heroIn').textContent = '••••••';
+    document.getElementById('heroOut').textContent = '••••••';
+    document.getElementById('heroBulan').textContent = '••••••';
+  } else {
+    animateNumber(document.getElementById('heroAmount'), net, 700, fmtFull);
+    animateNumber(document.getElementById('heroIn'), totalIn, 700, fmt);
+    animateNumber(document.getElementById('heroOut'), totalOut, 700, fmt);
+    animateNumber(document.getElementById('heroBulan'), bulanOut, 700, fmt);
+  }
 
   document.getElementById('walletGrid').innerHTML = wallets.map(w => {
     const bal = walletNet[w.id] || 0;
     const balDisplay = isBalanceHidden ? '••••••' : `${bal < 0 ? '−' : ''}${fmtFull(bal)}`;
     return `
-      <div class="wallet-card" onclick="navTo('riwayat',null);setFilterWallet('${w.id}')">
+    <div class="wallet-card" onclick="navTo('riwayat',null);setFilterWallet('${w.id}')">
       <div class="wallet-card-icon" style="background:${w.color}1F;color:${w.color}">${svgIcon(w.icon, 14)}</div>
       <div class="wallet-card-name">${w.name}</div>
       <div class="wallet-card-balance" style="color:${(bal < 0 && !isBalanceHidden) ? 'var(--red)' : 'var(--text)'}">${balDisplay}</div>
@@ -658,7 +891,7 @@ function renderLineChart() {
 
   if (chartLine) chartLine.destroy();
   const ctx = document.getElementById('chartLine').getContext('2d');
-  const greenColor  = getComputedStyle(document.documentElement).getPropertyValue('--green').trim() || '#30D158';
+  const greenColor  = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '';
   const gridCol = isDark ? '#232325' : '#E5E5EA';
   const tickCol = isDark ? '#636366' : '#AEAEB2';
   const lineOutColor = isDark ? '#F5F5F7' : '#1C1C1E';
@@ -666,11 +899,11 @@ function renderLineChart() {
   chartLine = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [
-      { label:'Pengeluaran', data:dataOut, borderColor:lineOutColor, backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:3, tension:0, fill:false },
-      { label:'Pemasukan',   data:dataIn,  borderColor:greenColor,  backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:3, tension:0, fill:false }
+      { label:'Pengeluaran', data:dataOut, borderColor:lineOutColor, backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:3, tension:0.3, fill:false },
+      { label:'Pemasukan',   data:dataIn,  borderColor:greenColor,  backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:3, tension:0.3, fill:true }
     ]},
     options: {
-      animation: false,
+      animation: { duration: 400, easing: 'easeOutQuart' },
       plugins: { legend: { labels: { color: tickCol, font:{size:11,family:'Inter'}, boxWidth:8, padding:14, usePointStyle:true, pointStyle:'circle' } } },
       scales: {
         x: { grid:{display:false}, ticks:{color:tickCol,font:{size:10}} },
@@ -784,7 +1017,7 @@ function renderStats() {
 
   document.getElementById('catBarList').innerHTML = sorted.slice(0,8).map(([k,v]) => {
     const cat = allCats.find(c=>c.id===k)||{icon:'box',name:k};
-    const pct = Math.round(v/total*100);
+    const pct = (v/total*100).toFixed(1);
     return `
       <div class="cat-bar-item">
         <div class="cat-bar-icon">${svgIcon(cat.icon, 14)}</div>
@@ -812,10 +1045,10 @@ function renderDonut(sorted, allCats) {
     type: 'doughnut',
     data: {
       labels: sorted.map(([k]) => (allCats.find(c=>c.id===k)||{name:k}).name),
-      datasets: [{ data: sorted.map(([,v])=>v), backgroundColor: COLORS, borderWidth: 0, hoverOffset: 4 }]
+      datasets: [{ data: sorted.map(([,v])=>v), backgroundColor: COLORS, borderWidth: 0, borderRadius: 4, spacing: 3, hoverOffset: 8 }]
     },
     options: {
-      animation: false,
+      animation: { duration: 500, easing: 'easeOutQuart' },
       plugins: { legend: { position:'bottom', labels: { color: tickCol, font:{size:11,family:'Inter'}, padding:12, boxWidth:9, usePointStyle:true, pointStyle:'circle' } } },
       cutout: '70%',
       responsive: true, maintainAspectRatio: true,
@@ -1122,17 +1355,32 @@ console.log('desc:', tx.desc, '| displayTitle:', displayTitle);
 
 async function deleteTx(id) {
   const tx = transactions.find(t => t.id === id);
-  const isTransfer = tx && (tx.type === 'transfer_out' || tx.type === 'transfer_in');
-
-  const msg = isTransfer
-    ? 'Ini transaksi transfer — kedua sisi (keluar & masuk) akan ikut terhapus. Lanjutkan?'
-    : 'Hapus transaksi ini secara permanen?';
-
+  if (!tx) return;
+  const isTransfer = tx.type === 'transfer_out' || tx.type === 'transfer_in';
+  
+  // ── VALIDASI: cek semua dompet yang terdampak, pastikan tidak jadi minus ──
+  const affectedWallets = isTransfer ?
+    [...new Set([tx.wallet, tx.transferPeer])] :
+    [tx.wallet];
+  
+  for (const walletId of affectedWallets) {
+    const balanceAfter = getWalletBalanceAfterDelete(walletId, id, isTransfer ? tx.transferId : null);
+    if (balanceAfter < 0) {
+      const w = wallets.find(w => w.id === walletId);
+      toast(`Tidak bisa dihapus — saldo ${w?.name || 'dompet'} akan jadi minus`, 'error');
+      return;
+    }
+  }
+  
+  const msg = isTransfer ?
+    'Ini transaksi transfer — kedua sisi (keluar & masuk) akan ikut terhapus. Lanjutkan?' :
+    'Hapus transaksi ini secara permanen?';
+  
   openModal('Hapus Transaksi', msg, async () => {
     try {
       if (isTransfer && tx.transferId) {
         const outId = tx.transferId + '_out';
-        const inId  = tx.transferId + '_in';
+        const inId = tx.transferId + '_in';
         await Promise.all([
           deleteDoc(doc(userCol('transactions'), outId)),
           deleteDoc(doc(userCol('transactions'), inId)),
@@ -1144,7 +1392,7 @@ async function deleteTx(id) {
       }
       renderHistory();
       renderDashboard();
-      toast('Transaksi dihapus','info');
+      toast('Transaksi dihapus', 'info');
     } catch (err) {
       console.error(err);
       toast('Gagal menghapus, cek koneksi', 'error');
@@ -1288,14 +1536,11 @@ document.getElementById('advancedSettingsOverlay').addEventListener('click', e =
 });
 
 // ── AUTH GUARD + LOAD DATA DARI FIRESTORE ──────────
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.replace('login.html');
-    return;
-  }
+const DEV_MODE = true;
 
-  uid = user.uid;
-
+async function loadDashboard() {
+  showDashboardSkeleton();
+  
   try {
     await fetchAll();
     buildCatPicker();
@@ -1303,11 +1548,29 @@ onAuthStateChanged(auth, async (user) => {
     buildWalletPickerPop();
     renderDashboard();
     renderAccountIdentity();
+    hideDashboardSkeleton();
   } catch (err) {
-    console.error('Gagal memuat data:', err);
-    toast('Gagal memuat data, cek koneksi', 'error');
+    console.error(err);
+    hideDashboardSkeleton();
   }
-});
+}
+
+if (DEV_MODE) {
+  uid = "1783668803493"; // UID sementara
+  loadDashboard();
+} else {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    
+    uid = user.uid;
+    await loadDashboard();
+  });
+}
+
+
 
 // ══════════════════════════════════════════════════
 // EXPOSE KE WINDOW — wajib karena main.js module,
@@ -1351,3 +1614,7 @@ window.cancelCatEdit = cancelCatEdit;
 window.selTransferWallet = selTransferWallet;
 window.toggleBalanceVisibility = toggleBalanceVisibility;
 window.toggleTransferPicker = toggleTransferPicker;
+window.toggleDatePicker = toggleDatePicker;
+window.shiftCalendarMonth = shiftCalendarMonth;
+window.selectCalendarDate = selectCalendarDate;
+window.selectToday = selectToday;

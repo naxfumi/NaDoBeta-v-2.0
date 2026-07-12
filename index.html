@@ -9,14 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6FP43XQGDC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-6FP43XQGDC');
-</script>
 <link rel="stylesheet" href="style.css"></link>
 </head>
 <body>
@@ -92,17 +84,26 @@
     <div class="page-content">
       <!-- ════ PAGE: DASHBOARD ════ -->
       <div class="page active" id="page-dashboard">
-        <div class="hero-card">
+        <div class="hero-card" id="heroCardSkeleton">
+          <div class="skeleton-glass skeleton-hero-amount"></div>
+          <div style="display:flex;gap:26px">
+            <div class="skeleton-glass skeleton-hero-stat"></div>
+            <div class="skeleton-glass skeleton-hero-stat"></div>
+            <div class="skeleton-glass skeleton-hero-stat"></div>
+          </div>
+        </div>
+        <div class="hero-card" id="heroCardContent" style="display:none">
           <div class="hero-label" style="display:flex;align-items:center;justify-content:space-between">
             <span>Total Saldo Keseluruhan</span>
-            <button onclick="toggleBalanceVisibility()" id="hideBalanceBtn" style="background:none;border:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;padding:4px">
+            <button onclick="toggleBalanceVisibility()" id="hideBalanceBtn" style="background:none;border:none;color:#F2F4FF;cursor:pointer;display:flex;align-items:center;padding:4px">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="hideBalanceIcon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
           <div class="hero-amount" id="heroAmount">Rp 0</div>
+          <div class="skeleton skeleton-hero-amount" id="heroAmountSkeleton" style="display:none"></div>
           <div class="hero-stats">
             <div class="hero-stat-item">
-              <div class="hero-stat-label"><div class="hero-stat-dot" style="background:var(--green)"></div> Pemasukan</div>
+              <div class="hero-stat-label"><div class="hero-stat-dot" style="background:var(--blue)"></div> Pemasukan</div>
               <div class="hero-stat-value" id="heroIn">Rp 0</div>
             </div>
             <div class="hero-stat-item">
@@ -119,7 +120,13 @@
         <div class="section-header mb16">
           <div class="section-title">Saldo per Dompet</div>
         </div>
-        <div class="wallet-grid" id="walletGrid"></div>
+        <div class="wallet-grid" id="walletGridSkeleton">
+          <div class="skeleton skeleton-wallet-card"></div>
+          <div class="skeleton skeleton-wallet-card"></div>
+          <div class="skeleton skeleton-wallet-card"></div>
+          <div class="skeleton skeleton-wallet-card"></div>
+        </div>
+        <div class="wallet-grid" id="walletGrid" style="display:none"></div>
 
         <div class="dash-bottom">
           <div class="card chart-wrap">
@@ -137,7 +144,12 @@
               <div class="section-title">Transaksi Terbaru</div>
               <button class="section-link" onclick="navTo('riwayat', document.querySelector('[data-page=riwayat]'))">Lihat Semua</button>
             </div>
-            <div id="recentList"></div>
+            <div id="recentListSkeleton">
+              <div class="skeleton skeleton-tx-item"></div>
+              <div class="skeleton skeleton-tx-item"></div>
+              <div class="skeleton skeleton-tx-item"></div>
+            </div>
+            <div id="recentList" style="display:none"></div>
           </div>
         </div>
       </div>
@@ -231,7 +243,29 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Tanggal</label>
-                <input class="form-input" id="inputDate" type="date">
+                <div class="date-picker-wrap">
+                  <button type="button" class="form-input date-picker-btn" id="dateDisplayBtn" onclick="toggleDatePicker()">
+                    <span id="dateDisplayText">Hari Ini</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </button>
+                  <div class="date-picker-pop" id="datePickerPop">
+                    <div class="date-picker-header">
+                      <button type="button" class="date-picker-nav" onclick="shiftCalendarMonth(-1)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                      </button>
+                      <div class="date-picker-title" id="calendarTitle">Juli 2026</div>
+                      <button type="button" class="date-picker-nav" onclick="shiftCalendarMonth(1)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </button>
+                    </div>
+                    <div class="date-picker-weekdays">
+                      <span>M</span><span>S</span><span>S</span><span>R</span><span>K</span><span>J</span><span>S</span>
+                    </div>
+                    <div class="date-picker-grid" id="calendarGrid"></div>
+                    <button type="button" class="date-picker-today" onclick="selectToday()">Hari Ini</button>
+                  </div>
+                </div>
+                <input type="hidden" id="inputDate" value="">
               </div>
             </div>
 
@@ -302,15 +336,20 @@
           </div>
 
           <!-- 3. Advanced settings trigger -->
-          <button class="data-btn mt16" style="width:100%" onclick="openAdvancedSettings()">
-            <span class="db-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </span>
-            <span class="db-text">
-              <span class="db-label">Pengaturan Lanjutan</span>
-              <span class="db-sub">Dompet, kategori, backup & lainnya</span>
-            </span>
-          </button>
+          <div class="card settings-card mt8">
+            <div class="settings-card-title">
+              Lainnya
+            </div>
+            <button class="data-btn mt16" style="width:100%" onclick="openAdvancedSettings()">
+              <span class="db-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </span>
+              <span class="db-text">
+                <span class="db-label">Pengaturan Lanjutan</span>
+                <span class="db-sub">Dompet, kategori, backup & lainnya</span>
+              </span>
+            </button>
+          </div>
 
           <!-- 4. Logout -->
           <button class="modal-btn danger mt16" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" onclick="confirmLogout()">
