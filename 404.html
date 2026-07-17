@@ -1,70 +1,220 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <style type="text/css" media="all">
-    body {
-      font-family: "Poppins", sans-serif;
-      height: 90vh;
-      background: #196042;
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      
-      height: 99vh;
-      color: #FFFFFF8A;
-    }
-    
-    .message {
-      width: 300px;
-      font-size: 1.5em;
-      display: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 45px;
-      background: #44444433;
-      border-radius: 30px;
-      box-shadow: 30px 10px 61px 0px rgba(0, 0, 0, 0.43);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      -webkit-box-shadow: 30px 10px 61px 0px rgba(0,0,0,0.75);
-      -moz-box-shadow: 30px 10px 61px 0px rgba(0,0,0,0.75);
-      
-background: linear-gradient(170deg, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0.23) 100%);
-      
-    }
-    .message::before {}
-    .message h1 {
-      font-weight: 900;
-      font-style: bold;
-    }
-    
-    span {
-      font-size: 15px;
-      font-weight: 500;
-    }
-    a {
+<title>404 - NaDomped</title>
 
-      color: #FFFFFF8a;
-      font-size: 13px;
-      font-weight: 300;
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0f1115;
+  --card:#181c23;
+  --accent: linear-gradient(135deg,
+    var(--accent1), var(--accent2));
+    
+  )
+  --text:#fff;
+  --text2:#9CA3AF;
+  --accent1: #29DE85;
+  --accent2: #0EC756;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Plus Jakarta Sans",sans-serif;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  min-height:100vh;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:360px;
+  text-align:center;
+}
+
+.icon{
+  width:90px;
+  height:90px;
+  margin:auto;
+  border-radius:24px;
+
+  background: var(--accent);
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-size:42px;
+  transition:transform 3s ease-in-out;
+  box-shadow:0 0 40px rgba(74, 222, 128, 0.35);
+}
+
+.icon svg {
+  width: 50px;
+  height: 50px;
+  color: #fff;
+}
+.svg {
+  transition:transform 2s ease-in-out;
+}
+
+
+@keyframes floating{
+
+    0%,100%{
+        transform:translateY(0);
     }
-  </style>
+
+    50%{
+        transform:translateY(-10px);
+    }
+
+}
+
+
+h1{
+  margin-top:25px;
+  font-size:72px;
+  color:var(--accent2);
+  line-height:1;
+  transform: rotate(-3deg);
+}
+
+h2{
+  margin-top:10px;
+  font-size:22px;
+  color: #fff;
+}
+
+p{
+  margin-top:12px;
+  color:var(--text2);
+  line-height:1.6;
+}
+
+.btn{
+  display:block;
+
+  margin-top:30px;
+
+  padding:14px;
+
+  border-radius:20px;
+
+  background: var(--accent);
+
+  color:#111;
+
+  text-decoration:none;
+
+  font-weight:700;
+
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+}
+
+.btn{
+    animation:btn 2s ease-in-out infinite;
+}
+
+@keyframes btn{
+
+    0%,100%{
+        transform:translateX(0px);
+    }
+
+    50%{
+        transform:translateX(8px);
+    }
+
+}
+
+.link{
+  display:inline-block;
+
+  margin-top:18px;
+
+  color:var(--text2);
+
+  text-decoration:none;
+}
+
+.link:hover{
+  color:var(--accent);
+}
+</style>
+
 </head>
-
 <body>
-  <div class="container">
-    <div class="message">
-      <h1>404</h1><h4>Not Found</h4>
-      <span>Halaman tidak ditemukan</span><br>
-      <span><a href="https://instagram.com/@nzrl_af">@naxfumi</a></span>
-    </div>
-  </div>
-</body>
 
+<div class="container">
+
+  <div class="icon" aria-hidden="true">
+    <div class="svg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="6" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+      <path d="M6 14h4" />
+      </div>
+    </svg>
+  </div>
+
+  <h1>404</h1>
+
+  <h2>Nadomped</h2>
+
+  <p>
+    Maaf, halaman telah dipindahkan.
+  </p>
+
+  <a href="https://nadomped.vercel.app" class="btn">
+    » Pergi ke NaDomped versi terbaru »
+  </a>
+
+  
+
+</div>
+
+<script>
+  const icon = document.querySelector(".icon");
+  const svg = document.querySelector(".svg");
+  randomFloat();
+  function randomFloat() {
+    
+    const x = Math.random() * 20 - 10; // -10 sampai 10
+    const y = Math.random() * 20 - 10;
+    
+    const rotate = Math.random() * 10 - 5;
+    
+    icon.style.transform =
+      `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+    svg.style.transform =
+      `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+  }
+
+  
+
+setInterval(randomFloat, 3000);
+</script>
+</body>
 </html>

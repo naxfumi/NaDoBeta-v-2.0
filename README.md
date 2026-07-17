@@ -1,1 +1,0 @@
-# NaDoBeta-v-3.0
